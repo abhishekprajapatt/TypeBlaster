@@ -123,6 +123,12 @@ function startGame() {
     gameStarted = true;
     spawnInterval = setInterval(spawnEnemy, getSpawnRate());
     difficultyInterval = setInterval(increaseDifficulty, 30000);
+    const mobileInput = document.getElementById('mobile-input');
+    if (mobileInput) {
+        mobileInput.focus();
+        mobileInput.addEventListener('input', handleMobileInput);
+        mobileInput.addEventListener('keydown', handleMobileKeydown);
+    }
     window.focus();
 }
 
@@ -431,7 +437,6 @@ document.addEventListener('keydown', (event) => {
                         enemyRect.top + enemyRect.height / 2
                     );
                     
-                    // Play explosion sound and create explosion animation
                     playSound('explosion');
                     createExplosion(enemy.x + 30, enemy.y);
                     
@@ -516,3 +521,153 @@ function gameLoop() {
 
 createMuteButton();
 gameLoop();
+
+
+
+function handleMobileInput(event) {
+    const input = event.target;
+    const value = input.value;
+    
+    if (value.length > currentTypedWord.length) {
+        const newChar = value.slice(-1).toLowerCase();
+        if (/^[a-zA-Z]$/.test(newChar)) {
+            processCharacter(newChar);
+        }
+    }
+    
+    setTimeout(() => {
+        input.value = '';
+    }, 10);
+}
+
+function handleMobileKeydown(event) {
+    if (event.key === 'Backspace') {
+        event.preventDefault();
+        processBackspace();
+    }
+}
+
+function processCharacter(typedChar) {
+    totalCharacters++;
+    currentTypedWord += typedChar;
+    
+    let foundMatch = false;
+    
+    enemies.forEach((enemy, index) => {
+        if (enemy.word.startsWith(currentTypedWord)) {
+            const expectedChar = enemy.word[currentTypedWord.length - 1];
+            if (typedChar === expectedChar) {
+                correctCharacters++;
+                playSound('laser');
+                fireCharacterLaser(enemy);
+                createMiniExplosion(enemy);
+            }
+            
+            if (currentEnemy !== enemy) {
+                if (currentEnemy) {
+                    currentEnemy.shipElement.classList.remove('targeted');
+                    currentEnemy.wordElement.textContent = currentEnemy.originalWord;
+                }
+                
+                currentEnemy = enemy;
+                currentEnemy.shipElement.classList.add('targeted');
+            }
+            
+            foundMatch = true;
+            
+            if (currentTypedWord === enemy.word) {
+                score += enemy.word.length * 10;
+                updateScoreAndLevel();
+                
+                const playerRect = playerShip.getBoundingClientRect();
+                const enemyRect = enemy.element.getBoundingClientRect();
+                fireLaser(
+                    playerRect.left + playerRect.width / 2,
+                    playerRect.top,
+                    enemyRect.left + enemyRect.width / 2,
+                    enemyRect.top + enemyRect.height / 2
+                );
+                
+                playSound('explosion');
+                createExplosion(enemy.x + 30, enemy.y);
+                
+                enemy.element.remove();
+                enemies.splice(index, 1);
+                
+                currentTypedWord = '';
+                currentEnemy = null;
+            }
+            
+            updateTypingDisplay();
+            updateAccuracy();
+            return;
+        }
+    });
+    
+    if (!foundMatch) {
+        if (currentEnemy) {
+            currentEnemy.shipElement.classList.remove('targeted');
+            currentEnemy.wordElement.textContent = currentEnemy.originalWord;
+            currentEnemy = null;
+        }
+        currentTypedWord = '';
+        updateTypingDisplay();
+    }
+    
+    currentWordElement.textContent = currentTypedWord;
+    updateAccuracy();
+}
+
+function processBackspace() {
+    if (currentTypedWord.length > 0) {
+        currentTypedWord = currentTypedWord.slice(0, -1);
+        currentWordElement.textContent = currentTypedWord;
+        
+        if (currentEnemy) {
+            if (currentTypedWord === '') {
+                currentEnemy.shipElement.classList.remove('targeted');
+                currentEnemy.wordElement.textContent = currentEnemy.originalWord;
+                currentEnemy = null;
+            } else if (currentEnemy.word.startsWith(currentTypedWord)) {
+                updateTypingDisplay();
+            } else {
+                currentEnemy.shipElement.classList.remove('targeted');
+                currentEnemy.wordElement.textContent = currentEnemy.originalWord;
+                currentEnemy = null;
+            }
+        }
+        
+        updateTypingDisplay();
+    }
+}
+
+document.addEventListener('keydown', (event) => {
+    if (!gameStarted && startScreen.style.display !== 'none') {
+        startGame();
+        return;
+    }
+    
+    if (!gameRunning || gameOverScreen.style.display === 'block' || startScreen.style.display === 'block') {
+        return;
+    }
+    
+    if (event.key.length === 1 && /^[a-zA-Z]$/.test(event.key)) {
+        processCharacter(event.key.toLowerCase());
+    } else if (event.key === 'Backspace') {
+        processBackspace();
+    }
+});
+
+function restartGame() {
+    gameOverScreen.style.display = 'none';
+    startGame();
+}
+
+document.addEventListener('touchstart', () => {
+    if (gameRunning) {
+        const mobileInput = document.getElementById('mobile-input');
+        if (mobileInput) {
+            mobileInput.focus();
+        }
+    }
+});
