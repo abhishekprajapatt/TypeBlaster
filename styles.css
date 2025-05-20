@@ -1,0 +1,776 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    user-select: none;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to bottom, #000428, #004e92);
+}
+
+#score-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 24px;
+    z-index: 100;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+#level-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    z-index: 100;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+#accuracy-container {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    font-size: 20px;
+    z-index: 100;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+#input-container {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    text-align: center;
+    z-index: 100;
+}
+
+#current-word {
+    font-size: 32px;
+    color: #4CAF50;
+    margin-bottom: 10px;
+    min-height: 40px;
+    text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+#typing-display {
+    font-size: 24px;
+    min-height: 30px;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    padding: 8px 15px;
+    border: 2px solid #333;
+}
+
+.correct-char {
+    color: #4CAF50;
+    background: rgba(76, 175, 80, 0.2);
+    text-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+.incorrect-char {
+    color: #f44336;
+    background: rgba(244, 67, 54, 0.2);
+    text-shadow: 0 0 5px rgba(244, 67, 54, 0.5);
+    animation: shake 0.3s ease-in-out;
+}
+
+.remaining-char {
+    color: #999;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+#game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: #ff0000;
+    text-align: center;
+    display: none;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 40px;
+    border-radius: 15px;
+    border: 2px solid #ff0000;
+    width: 90%;
+    max-width: 600px;
+}
+
+#game-over h1 {
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px #ff0000;
+}
+
+#game-over p {
+    font-size: 24px;
+    margin: 10px 0;
+}
+
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 300;
+    padding: 20px;
+}
+
+#game-title {
+    font-size: 72px;
+    margin-bottom: 30px;
+    text-shadow: 0 0 20px #4CAF50;
+    background: linear-gradient(45deg, #4CAF50, #81C784);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 2s ease-in-out infinite;
+    text-align: center;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+#instructions {
+    font-size: 22px;
+    margin-bottom: 20px;
+    text-align: center;
+    width: 80%;
+    max-width: 600px;
+    line-height: 1.6;
+    color: #e0e0e0;
+}
+
+#start-hint {
+    font-size: 18px;
+    color: #4CAF50;
+    margin-bottom: 30px;
+    animation: blink 1.5s ease-in-out infinite;
+    text-align: center;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+
+.start-button {
+    padding: 15px 40px;
+    font-size: 24px;
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.start-button:hover {
+    background: linear-gradient(45deg, #45a049, #4CAF50);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.start-button:active {
+    transform: translateY(0);
+}
+
+.enemy {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease;
+}
+
+.enemy-word {
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 2px 8px;
+    border-radius: 3px;
+}
+
+.ship {
+    width: 60px;
+    height: 30px;
+    background: linear-gradient(45deg, #ff5722, #ff8a65);
+    clip-path: polygon(0% 50%, 20% 0%, 80% 0%, 100% 50%, 80% 100%, 20% 100%);
+    position: relative;
+    box-shadow: 0 2px 10px rgba(255, 87, 34, 0.3);
+    transition: all 0.3s ease;
+}
+
+.ship.targeted {
+    background: linear-gradient(45deg, #ffeb3b, #fff176);
+    box-shadow: 0 0 20px rgba(255, 235, 59, 0.8);
+    transform: scale(1.1);
+}
+
+.ship::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2));
+    clip-path: inherit;
+}
+
+#player-ship {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 30px;
+    background: linear-gradient(45deg, #4CAF50, #66BB6A);
+    clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+}
+
+#player-ship::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3));
+    clip-path: inherit;
+}
+
+.laser {
+    position: absolute;
+    width: 3px;
+    background: linear-gradient(to top, #4CAF50, #81C784);
+    transform-origin: bottom center;
+    box-shadow: 0 0 10px #4CAF50;
+    animation: laser-pulse 0.2s ease-in-out;
+    z-index: 3;
+}
+
+@keyframes laser-pulse {
+    0% { opacity: 0; transform: scaleY(0); }
+    50% { opacity: 1; transform: scaleY(1); }
+    100% { opacity: 0.7; }
+}
+
+.explosion {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, #ffeb3b, #ff9800, #ff5722, transparent 70%);
+    border-radius: 50%;
+    opacity: 1;
+    animation: explode 0.6s forwards;
+    z-index: 5;
+}
+
+@keyframes explode {
+    0% {
+        transform: scale(0.3);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+#health-bar-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 20px;
+    background-color: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #555;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+}
+
+#health-bar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #4CAF50, #66BB6A);
+    transition: width 0.3s ease;
+    border-radius: 8px;
+    position: relative;
+}
+
+#health-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+    border-radius: 8px 8px 0 0;
+}
+
+.mini-explosion {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, #ffeb3b, #ff9800, transparent 70%);
+    border-radius: 50%;
+    opacity: 1;
+    animation: mini-explode 0.3s forwards;
+    z-index: 5;
+}
+
+@keyframes mini-explode {
+    0% {
+        transform: scale(0.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+.character-laser {
+    width: 2px !important;
+    background: linear-gradient(to top, #4CAF50, #81C784);
+    box-shadow: 0 0 8px #4CAF50, 0 0 15px rgba(76, 175, 80, 0.5);
+    animation: char-laser-pulse 0.2s ease-in-out;
+    z-index: 4;
+}
+
+@keyframes char-laser-pulse {
+    0% { opacity: 0; transform: scaleY(0); }
+    25% { opacity: 1; }
+    100% { opacity: 0; transform: scaleY(1); }
+}
+
+#mute-button {
+    position: absolute;
+    top: 20px;
+    left: 120px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 200;
+    background-color: rgba(0,0,0,0.3);
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+#mute-button:hover {
+    transform: scale(1.1);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    background-color: rgba(0,0,0,0.5);
+}
+
+@media (max-width: 480px) {
+    #game-title {
+        font-size: 38px;
+        margin-bottom: 15px;
+    }
+    
+    #instructions {
+        font-size: 14px;
+        width: 95%;
+        margin-bottom: 15px;
+    }
+    
+    #start-hint {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    
+    .start-button {
+        padding: 10px 25px;
+        font-size: 18px;
+    }
+    
+    #score-container, #level-container {
+        font-size: 16px;
+    }
+    
+    #accuracy-container {
+        top: 45px;
+        font-size: 14px;
+    }
+    
+    #current-word {
+        font-size: 20px;
+        min-height: 30px;
+    }
+    
+    #typing-display {
+        font-size: 16px;
+        padding: 6px 10px;
+    }
+    
+    #mute-button {
+        font-size: 16px;
+        left: 90px;
+        top: 20px;
+    }
+    
+    #player-ship {
+        width: 40px;
+        height: 24px;
+        bottom: 80px;
+    }
+    
+    .ship {
+        width: 44px;
+        height: 22px;
+    }
+    
+    .enemy-word {
+        font-size: 14px;
+    }
+    
+    #health-bar-container {
+        width: 200px;
+        height: 15px;
+    }
+    
+    #game-over {
+        padding: 20px;
+    }
+    
+    #game-over h1 {
+        font-size: 32px;
+    }
+    
+    #game-over p {
+        font-size: 18px;
+    }
+    
+    .explosion {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .mini-explosion {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+    #game-title {
+        font-size: 46px;
+        margin-bottom: 20px;
+    }
+    
+    #instructions {
+        font-size: 16px;
+        width: 90%;
+    }
+    
+    #start-hint {
+        font-size: 16px;
+    }
+    
+    .start-button {
+        padding: 12px 30px;
+        font-size: 20px;
+    }
+    
+    #score-container, #level-container {
+        font-size: 18px;
+    }
+    
+    #accuracy-container {
+        top: 50px;
+        font-size: 16px;
+    }
+    
+    #current-word {
+        font-size: 22px;
+        min-height: 35px;
+    }
+    
+    #typing-display {
+        font-size: 18px;
+    }
+    
+    #mute-button {
+        font-size: 18px;
+        left: 100px;
+    }
+    
+    #player-ship {
+        width: 45px;
+        height: 27px;
+        bottom: 90px;
+    }
+    
+    .ship {
+        width: 50px;
+        height: 25px;
+    }
+    
+    .enemy-word {
+        font-size: 16px;
+    }
+    
+    #health-bar-container {
+        width: 250px;
+        height: 18px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    #game-title {
+        font-size: 60px;
+    }
+    
+    #instructions {
+        font-size: 18px;
+        width: 80%;
+    }
+    
+    #score-container, #level-container {
+        font-size: 22px;
+    }
+    
+    #accuracy-container {
+        font-size: 18px;
+    }
+    
+    #current-word {
+        font-size: 28px;
+    }
+    
+    #typing-display {
+        font-size: 22px;
+    }
+    
+    #mute-button {
+        font-size: 22px;
+        left: 115px;
+    }
+    
+    #game-over h1 {
+        font-size: 42px;
+    }
+    
+    #game-over p {
+        font-size: 22px;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1365px) {
+    #game-title {
+        font-size: 68px;
+    }
+    
+    #instructions {
+        font-size: 20px;
+    }
+    
+    #start-hint {
+        font-size: 18px;
+    }
+    
+    #health-bar-container {
+        width: 350px;
+    }
+    
+    .ship {
+        width: 65px;
+        height: 32px;
+    }
+    
+    .enemy-word {
+        font-size: 18px;
+    }
+}
+
+@media (min-width: 1366px) and (max-width: 1919px) {
+    #game-title {
+        font-size: 80px;
+    }
+    
+    #instructions {
+        font-size: 22px;
+        max-width: 700px;
+    }
+    
+    #current-word {
+        font-size: 34px;
+    }
+    
+    #typing-display {
+        font-size: 26px;
+        max-width: 800px;
+        margin: 0 auto 10px;
+    }
+    
+    #score-container, #level-container {
+        font-size: 26px;
+    }
+    
+    #accuracy-container {
+        font-size: 22px;
+    }
+    
+    #health-bar-container {
+        width: 400px;
+        height: 22px;
+    }
+    
+    #player-ship {
+        width: 60px;
+        height: 36px;
+    }
+    
+    .ship {
+        width: 70px;
+        height: 35px;
+    }
+    
+    .enemy-word {
+        font-size: 20px;
+    }
+}
+
+@media (min-width: 1920px) {
+    #game-title {
+        font-size: 100px;
+        margin-bottom: 40px;
+    }
+    
+    #instructions {
+        font-size: 26px;
+        max-width: 900px;
+        margin-bottom: 30px;
+    }
+    
+    #start-hint {
+        font-size: 22px;
+        margin-bottom: 40px;
+    }
+    
+    .start-button {
+        padding: 18px 50px;
+        font-size: 28px;
+    }
+    
+    #score-container, #level-container {
+        font-size: 30px;
+        padding: 5px 10px;
+        background: rgba(0,0,0,0.2);
+        border-radius: 8px;
+    }
+    
+    #accuracy-container {
+        font-size: 26px;
+        top: 70px;
+    }
+    
+    #current-word {
+        font-size: 40px;
+        min-height: 50px;
+    }
+    
+    #typing-display {
+        font-size: 30px;
+        max-width: 1000px;
+        margin: 0 auto 15px;
+        padding: 12px 20px;
+    }
+    
+    #mute-button {
+        font-size: 28px;
+        left: 140px;
+        padding: 8px 15px;
+    }
+    
+    #health-bar-container {
+        width: 500px;
+        height: 25px;
+        bottom: 30px;
+    }
+    
+    #player-ship {
+        width: 70px;
+        height: 42px;
+        bottom: 120px;
+    }
+    
+    .ship {
+        width: 80px;
+        height: 40px;
+    }
+    
+    .enemy-word {
+        font-size: 22px;
+    }
+    
+    #game-over {
+        padding: 60px;
+        max-width: 800px;
+    }
+    
+    #game-over h1 {
+        font-size: 60px;
+    }
+    
+    #game-over p {
+        font-size: 30px;
+    }
+    
+    .explosion {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .mini-explosion {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .laser {
+        width: 4px;
+    }
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeBlaster - A ZType-inspired Typing Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="score-container">Score: <span id="score">0</span></div>
+        <div id="level-container">Level: <span id="level">1</span></div>
+        <div id="accuracy-container">Accuracy: <span id="accuracy">100%</span></div>
+        <div id="player-ship"></div>
+        <div id="health-bar-container">
+            <div id="health-bar"></div>
+        </div>
+        <div id="input-container">
+            <div id="current-word"></div>
+            <div id="typing-display"></div>
+        </div>
+        <div id="game-over">
+            <h1>Game Over</h1>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <p>Final Accuracy: <span id="final-accuracy">0%</span></p>
+            <button class="start-button" onclick="restartGame()">Play Again</button>
+        </div>
+        <div id="start-screen">
+            <div id="game-title">TypeBlaster</div>
+            <div id="instructions">
+                Welcome to TypeBlaster!<br><br>
+                🎯 Type the words on enemy ships to destroy them<br>
+                ⚡ Every correct character fires a laser beam<br>
+                🔊 Experience sound effects for every hit and explosion<br>
+                ⚠️ Prevent ships from reaching your base<br>
+                📈 Game gets harder with each level<br>
+                🎮 Green = correct, Red = incorrect characters<br><br>
+                Ready to test your typing skills?
+            </div>
+            <div id="start-hint">Press any key or click Start to begin!</div>
+            <button class="start-button" onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+    
+    <audio id="laser-sound" preload="auto" src="/sounds/laser.mp3"></audio>
+    <audio id="explosion-sound" preload="auto" src="/sounds/explosion.mp3"></audio>
+    <audio id="gameover-sound" preload="auto" src="/sounds/gameover.mp3"></audio>
+    <audio id="keypress-sound" preload="auto" src="/sounds/keypress.mp3"></audio>
+    
+    <script src="script.js"></script>
+</body>
+</html>
